@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+
+class Reserva extends Model
+{
+    use HasFactory;
+
+    protected $table = 'reserva';
+    protected $fillable = ['iduser', 'idvacacion'];
+
+    public function usuario(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'iduser');
+    }
+
+    public function vacacion(): BelongsTo
+    {
+        return $this->belongsTo(Vacacion::class, 'idvacacion');
+    }
+}
