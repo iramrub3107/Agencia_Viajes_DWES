@@ -71,7 +71,7 @@
                             @endphp
 
                             @if(!empty($nombreImagen))
-                                <img src="{{ asset('vacaciones/' . $nombreImagenClean) }}" alt="{{ $vacacion->titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                <img src="{{ asset('img-vacaciones/' . $nombreImagenClean) }}" alt="{{ $vacacion->titulo }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
                             @else
                                 <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 bg-gray-50">
                                     <span class="text-xs mt-1 font-medium">Sin imagen promocional</span>

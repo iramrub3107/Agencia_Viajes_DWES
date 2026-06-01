@@ -16,7 +16,7 @@
                 $nombreImagenClean = str_replace(['vacaciones/', 'storage/'], '', $foto->ruta);
             @endphp
             <div class="{{ $index === 0 ? 'md:col-span-3 h-96' : 'h-48' }} bg-gray-100 rounded-lg overflow-hidden shadow-sm">
-                <img src="{{ asset('vacaciones/' . $nombreImagenClean) }}" alt="Foto {{ $index + 1 }}" class="w-full h-full object-cover hover:scale-105 transition duration-300">
+                <img src="{{ asset('img-vacaciones/' . $nombreImagenClean) }}" alt="Foto {{ $index + 1 }}" class="w-full h-full object-cover hover:scale-105 transition duration-300">
             </div>
         @endforeach
     </div>

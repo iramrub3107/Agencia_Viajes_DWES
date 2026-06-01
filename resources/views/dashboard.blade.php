@@ -266,29 +266,46 @@
 </div>
 
 <script>
+// --- LOGICA DE MODALES DE CONFIRMACIÓN ---
 function confirmarEliminarUsuario(urlAccion) {
     const modal = document.getElementById('modal-eliminar-usuario');
     const form = document.getElementById('form-eliminar-usuario');
-    form.action = urlAccion;
-    modal.classList.remove('hidden');
+    if (form) form.action = urlAccion;
+    if (modal) modal.classList.remove('hidden');
 }
 
 function cerrarModalUsuario() {
-    document.getElementById('modal-eliminar-usuario').classList.add('hidden');
+    const modal = document.getElementById('modal-eliminar-usuario');
+    if (modal) modal.classList.add('hidden');
 }
 
 function confirmarEliminarPaquete(urlAccion) {
     const modal = document.getElementById('modal-eliminar-paquete');
     const form = document.getElementById('form-eliminar-paquete');
-    form.action = urlAccion;
-    modal.classList.remove('hidden');
+    if (form) form.action = urlAccion;
+    if (modal) modal.classList.remove('hidden');
 }
 
 function cerrarModalPaquete() {
-    document.getElementById('modal-eliminar-paquete').classList.add('hidden');
+    const modal = document.getElementById('modal-eliminar-paquete');
+    if (modal) modal.classList.add('hidden');
 }
 
+window.onclick = function(event) {
+    const modalUser = document.getElementById('modal-eliminar-usuario');
+    const modalPack = document.getElementById('modal-eliminar-paquete');
+    if (event.target == modalUser) cerrarModalUsuario();
+    if (event.target == modalPack) cerrarModalPaquete();
+}
+
+// --- LÓGICA DE FILTRADO Y ORDENACIÓN SEGURO (JS UNIFICADO) ---
+let filasOriginalesPaquetes = [];
 let filasOriginalesUsuarios = [];
+
+const estadosOrdenacion = {
+    titulo: 'ninguno',
+    precio: 'ninguno'
+};
 
 const estadosOrdenacionUsuarios = {
     name: 'ninguno',
@@ -297,17 +314,24 @@ const estadosOrdenacionUsuarios = {
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-    const tbodyPaquetes = document.getElementById('body-paquetes');
-    if (tbodyPaquetes) {
-        filasOriginalesPaquetes = Array.from(tbodyPaquetes.querySelectorAll('tr'));
-    }
+    // Captura segura de la tabla de paquetes
+    try {
+        const tbodyPaquetes = document.getElementById('body-paquetes');
+        if (tbodyPaquetes) {
+            filasOriginalesPaquetes = Array.from(tbodyPaquetes.querySelectorAll('tr'));
+        }
+    } catch (e) { console.error("Error cargando tabla de paquetes:", e); }
 
-    const tbodyUsuarios = document.getElementById('body-usuarios');
-    if (tbodyUsuarios) {
-        filasOriginalesUsuarios = Array.from(tbodyUsuarios.querySelectorAll('tr'));
-    }
+    // Captura segura de la tabla de usuarios
+    try {
+        const tbodyUsuarios = document.getElementById('body-usuarios');
+        if (tbodyUsuarios) {
+            filasOriginalesUsuarios = Array.from(tbodyUsuarios.querySelectorAll('tr'));
+        }
+    } catch (e) { console.error("Error cargando tabla de usuarios:", e); }
 });
 
+// Función para ordenar la tabla de usuarios
 function gestionarOrdenacionUsuarios(columnaKey, columnaIndex) {
     const tbody = document.getElementById('body-usuarios');
     if (!tbody) return;
@@ -324,9 +348,13 @@ function gestionarOrdenacionUsuarios(columnaKey, columnaIndex) {
         if (key !== columnaKey) estadosOrdenacionUsuarios[key] = 'ninguno';
     });
 
-    document.getElementById('indicador-user-name').innerText = estadosOrdenacionUsuarios.name === 'asc' ? '↑' : (estadosOrdenacionUsuarios.name === 'desc' ? '↓' : '↕');
-    document.getElementById('indicador-user-email').innerText = estadosOrdenacionUsuarios.email === 'asc' ? '↑' : (estadosOrdenacionUsuarios.email === 'desc' ? '↓' : '↕');
-    document.getElementById('indicador-user-rol').innerText = estadosOrdenacionUsuarios.rol === 'asc' ? '↑' : (estadosOrdenacionUsuarios.rol === 'desc' ? '↓' : '↕');
+    const indName = document.getElementById('indicador-user-name');
+    const indEmail = document.getElementById('indicador-user-email');
+    const indRol = document.getElementById('indicador-user-rol');
+
+    if (indName) indName.innerText = estadosOrdenacionUsuarios.name === 'asc' ? '↑' : (estadosOrdenacionUsuarios.name === 'desc' ? '↓' : '↕');
+    if (indEmail) indEmail.innerText = estadosOrdenacionUsuarios.email === 'asc' ? '↑' : (estadosOrdenacionUsuarios.email === 'desc' ? '↓' : '↕');
+    if (indRol) indRol.innerText = estadosOrdenacionUsuarios.rol === 'asc' ? '↑' : (estadosOrdenacionUsuarios.rol === 'desc' ? '↓' : '↕');
 
     if (estadosOrdenacionUsuarios[columnaKey] === 'ninguno') {
         tbody.innerHTML = '';
@@ -336,12 +364,10 @@ function gestionarOrdenacionUsuarios(columnaKey, columnaIndex) {
         const esAscendente = estadosOrdenacionUsuarios[columnaKey] === 'asc';
 
         filasParaOrdenar.sort((filaA, filaB) => {
+            if (!filaA.children[columnaIndex] || !filaB.children[columnaIndex]) return 0;
             const celdaA = filaA.children[columnaIndex].innerText.trim();
             const celdaB = filaB.children[columnaIndex].innerText.trim();
-
-            return esAscendente 
-                ? celdaA.localeCompare(celdaB) 
-                : celdaB.localeCompare(celdaA);
+            return esAscendente ? celdaA.localeCompare(celdaB) : celdaB.localeCompare(celdaA);
         });
 
         tbody.innerHTML = '';
@@ -349,20 +375,7 @@ function gestionarOrdenacionUsuarios(columnaKey, columnaIndex) {
     }
 }
 
-let filasOriginalesPaquetes = [];
-
-const estadosOrdenacion = {
-    titulo: 'ninguno',
-    precio: 'ninguno'
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-    const tbody = document.getElementById('body-paquetes');
-    if (tbody) {
-        filasOriginalesPaquetes = Array.from(tbody.querySelectorAll('tr'));
-    }
-});
-
+// Función para ordenar la tabla de paquetes
 function gestionarOrdenacion(columnaKey, columnaIndex, tipo) {
     const tbody = document.getElementById('body-paquetes');
     if (!tbody) return;
@@ -379,8 +392,11 @@ function gestionarOrdenacion(columnaKey, columnaIndex, tipo) {
         if (key !== columnaKey) estadosOrdenacion[key] = 'ninguno';
     });
 
-    document.getElementById('indicador-titulo').innerText = estadosOrdenacion.titulo === 'asc' ? '↑' : (estadosOrdenacion.titulo === 'desc' ? '↓' : '↕');
-    document.getElementById('indicador-precio').innerText = estadosOrdenacion.precio === 'asc' ? '↑' : (estadosOrdenacion.precio === 'desc' ? '↓' : '↕');
+    const indTitulo = document.getElementById('indicador-titulo');
+    const indPrecio = document.getElementById('indicador-precio');
+
+    if (indTitulo) indTitulo.innerText = estadosOrdenacion.titulo === 'asc' ? '↑' : (estadosOrdenacion.titulo === 'desc' ? '↓' : '↕');
+    if (indPrecio) indPrecio.innerText = estadosOrdenacion.precio === 'asc' ? '↑' : (estadosOrdenacion.precio === 'desc' ? '↓' : '↕');
 
     if (estadosOrdenacion[columnaKey] === 'ninguno') {
         tbody.innerHTML = '';
@@ -390,6 +406,7 @@ function gestionarOrdenacion(columnaKey, columnaIndex, tipo) {
         const esAscendente = estadosOrdenacion[columnaKey] === 'asc';
 
         filasParaOrdenar.sort((filaA, filaB) => {
+            if (!filaA.children[columnaIndex] || !filaB.children[columnaIndex]) return 0;
             let celdaA = filaA.children[columnaIndex].innerText.trim();
             let celdaB = filaB.children[columnaIndex].innerText.trim();
 
@@ -406,13 +423,5 @@ function gestionarOrdenacion(columnaKey, columnaIndex, tipo) {
         filasParaOrdenar.forEach(fila => tbody.appendChild(fila));
     }
 }
-
-window.onclick = function(event) {
-    const modalUser = document.getElementById('modal-eliminar-usuario');
-    const modalPack = document.getElementById('modal-eliminar-paquete');
-    if (event.target == modalUser) cerrarModalUsuario();
-    if (event.target == modalPack) cerrarModalPaquete();
-}
 </script>
-
 @endsection
